@@ -7,7 +7,9 @@ class MastermindGame
     @gameboard = Array.new
     @result_array = Array.new
     @turn_count = 1
-    @result_array[0] = ['0', '0', 'x', 'x']
+    @computer_code = Array.new
+    @guess = Array.new
+    @checkmark = "\u2713"
   end
 
   def print_board
@@ -22,43 +24,76 @@ class MastermindGame
     puts 'Make your 4-peg guess from 6 colors (red (r), green (g), yellow (y), blue (b), magenta (m), and aqua (a)) separated by a comma.'
     user_input_raw = gets.chomp.downcase.gsub(/\s+/, "")
     @user_input = user_input_raw.split(',')
-    update_board
+    if @user_input.length != 4 
+      user_input
+    end
+    update_board(@user_input)
   end
 
-  def update_board
+  def update_board(input_array)
     # I love you. You're doin such a good job :3 
     # - Cat #
+    @guess = []
     @display_array = Array.new
-    @user_input.each do |color|
+    input_array.each do |color|
       if color == 'red' || color == 'r'
         @display_array << Rainbow('O').red
+        @guess << 'red'
       elsif color == 'green' || color == 'g'
         @display_array << Rainbow('O').green
+        @guess << 'green'
       elsif color == 'yellow' || color == 'y'
         @display_array << Rainbow('0').yellow
+        @guess << 'yellow'
       elsif color == 'blue' || color == 'b'
         @display_array << Rainbow('0').blue
+        @guess << 'blue'
       elsif color == 'magenta' || color == 'm'
         @display_array << Rainbow('0').magenta
+        @guess << 'magenta'
       elsif color == 'aqua' || color == 'a'
         @display_array << Rainbow('0').aqua
+        @guess << 'aqua'
       else
         puts "Please select colors from the list of six."
         user_input
       end
     end
     @gameboard << @display_array
-    @result_array << ['0', '0', 'x', 'x']
-    print_board
     @turn_count += 1
   end
 
-  def play_game
+  def get_computer_code
+    color_array = ['red', 'green', 'yellow', 'blue', 'magenta', 'aqua']
+    4.times do @computer_code << color_array.sample; end
+  end
+
+  def compare_code_guess
+    @turn_result = []
+    temp_comp_code = @computer_code.map{|element| element}
+    @guess.each_with_index do |guess, index|
+      if guess == temp_comp_code[index]
+        @turn_result << @checkmark
+        temp_comp_code[index] = nil
+      elsif temp_comp_code.include?(guess)
+        @turn_result << 'O'
+        temp_comp_code[temp_comp_code.index guess] = nil
+      else
+        @turn_result << 'X'
+      end
+    end
+    @result_array << @turn_result
+  end
+
+  def play_vs_pc_codemaker
+    get_computer_code
     while @turn_count < 13
       user_input
+      compare_code_guess
+      print_board
     end
   end
 end
 
 new_game = MastermindGame.new
-new_game.play_game
+new_game.play_vs_pc_codemaker
