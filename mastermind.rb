@@ -10,6 +10,7 @@ class MastermindGame
     @computer_code = Array.new
     @guess = Array.new
     @checkmark = "\u2713"
+    @winner = nil
   end
 
   def print_board
@@ -68,6 +69,10 @@ class MastermindGame
     4.times do @computer_code << color_array.sample; end
   end
 
+  def sort_turn_result
+    @sorted_turn = @turn_result.sort{|a,b| b <=> a}
+  end
+
   def compare_code_guess
     @turn_result = []
     temp_comp_code = @computer_code.map{|element| element}
@@ -76,22 +81,36 @@ class MastermindGame
         @turn_result << @checkmark
         temp_comp_code[index] = nil
       elsif temp_comp_code.include?(guess)
-        @turn_result << 'O'
+        @turn_result << 'o'
         temp_comp_code[temp_comp_code.index guess] = nil
       else
         @turn_result << 'X'
       end
     end
-    @result_array << @turn_result
+    check_winner
+    p @turn_result
+    sort_turn_result
+    p @sorted_turn
+    p @winner
+    @result_array << @sorted_turn
+  end
+
+  def check_winner
+    if @turn_result.uniq.size == 1 && @turn_result[0] == @checkmark
+      @winner = 'the player'
+    elsif @turn_count > 12
+      @winner = 'the computer'
+    end
   end
 
   def play_vs_pc_codemaker
     get_computer_code
-    while @turn_count < 13
+    until @turn_count > 12 || @winner
       user_input
       compare_code_guess
       print_board
     end
+    puts "The winner is #{@winner}!"
   end
 end
 
